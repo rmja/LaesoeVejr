@@ -39,15 +39,14 @@ interface DateTimePoint {
 }
 
 const STATION_ID: StationId = "vesteroe-havn";
-type Period = "past" | "PT24H" | "P30D" | "P24M";
+type Period = "past" | "PT2H" | "PT24H" | "P30D" | "P24M";
 
 @customElement({ name: "dashboard-page", template })
 export class DashboardPage {
   current!: WeatherDataViewModel;
-  private past!: WeatherData[];
   private history!: AggregateWeatherData[];
-  periods: Period[] = ["past", "PT24H", "P30D", "P24M"];
-  selectedPeriod: Period = "past";
+  periods: Period[] = ["past", "PT2H", "PT24H", "P30D", "P24M"];
+  selectedPeriod: Period = "PT2H";
   cameras: CameraId[] = [
     "laesoefaergen-oest",
     "laesoefaergen-vest",
@@ -71,8 +70,14 @@ export class DashboardPage {
   }
 
   async loading() {
-    this.past = await this.api.weather.getWeather(STATION_ID, { limit: 500 });
-    this.current = this.past[0];
+    const weather = await this.api.weather.getWeather(STATION_ID, { limit: 1 });
+    this.current = weather[0];
+    const { start, end, step } = this.getHistoryPeriod();
+    this.history = await this.api.weather.getWeatherHistory("vesteroe-havn", {
+      start,
+      end,
+      step,
+    });
   }
 
   attached() {
@@ -82,13 +87,13 @@ export class DashboardPage {
         datasets: [
           {
             label: "Middelvind",
-            data: getChartData(this.past, (x) => x.windSpeed),
+            data: getChartData(this.history, (x) => x.windSpeedAvg),
             borderColor: "#1ab394",
             backgroundColor: "#ffffff00",
           },
           {
             label: "Vindstød",
-            data: getChartData(this.past, (x) => x.windGust),
+            data: getChartData(this.history, (x) => x.windGustAvg),
             borderDash: [5, 5],
             borderColor: "#1ab394",
             backgroundColor: "#ffffff00",
@@ -122,13 +127,13 @@ export class DashboardPage {
         datasets: [
           {
             label: "Lufttemperatur",
-            data: getChartData(this.past, (x) => x.airTemperature),
+            data: getChartData(this.history, (x) => x.airTemperatureAvg),
             borderColor: "#ed5565",
             backgroundColor: "#ffffff00",
           },
           {
             label: "Vandtemperatur",
-            data: getChartData(this.past, (x) => x.waterTemperature),
+            data: getChartData(this.history, (x) => x.waterTemperatureAvg),
             borderColor: "#1c84c6",
             backgroundColor: "#ffffff00",
           },
@@ -160,7 +165,7 @@ export class DashboardPage {
       data: {
         datasets: [
           {
-            data: getChartData(this.past, (x) => x.seaLevel),
+            data: getChartData(this.history, (x) => x.seaLevelAvg),
             backgroundColor: "#7b70ef",
           },
         ],
@@ -197,16 +202,20 @@ export class DashboardPage {
   async setChartPeriod(period: Period) {
     this.selectedPeriod = period;
 
-    if (this.selectedPeriod === "past") {
-      this.windChart.data.datasets[0].data = getChartData(this.past, (x) => x.windSpeed);
-      this.windChart.data.datasets[1].data = getChartData(this.past, (x) => x.windGust);
+    if (period === "past") {
+      const past = await this.api.weather.getWeather("vesteroe-havn", {
+        limit: 500,
+      });
+
+      this.windChart.data.datasets[0].data = getChartData(past, (x) => x.windSpeed);
+      this.windChart.data.datasets[1].data = getChartData(past, (x) => x.windGust);
       this.windChart.update();
 
-      this.temperatureChart.data.datasets[0].data = getChartData(this.past, (x) => x.airTemperature);
-      this.temperatureChart.data.datasets[1].data = getChartData(this.past, (x) => x.waterTemperature);
+      this.temperatureChart.data.datasets[0].data = getChartData(past, (x) => x.airTemperature);
+      this.temperatureChart.data.datasets[1].data = getChartData(past, (x) => x.waterTemperature);
       this.temperatureChart.update();
 
-      this.waterLevelChart.data.datasets[0].data = getChartData(this.past, (x) => x.seaLevel);
+      this.waterLevelChart.data.datasets[0].data = getChartData(past, (x) => x.seaLevel);
       this.waterLevelChart.update();
     } else {
       const { start, end, step } = this.getHistoryPeriod();
@@ -230,7 +239,8 @@ export class DashboardPage {
   }
 
   private getHistoryPeriod() {
-    const duration = Duration.fromISO(this.selectedPeriod);
+    const period = this.selectedPeriod;
+    const duration = Duration.fromISO(period);
     const step = duration.hours ? "hour" : duration.days ? "day" : "month";
     const end = DateTime.local()
       .startOf(step)
@@ -238,7 +248,7 @@ export class DashboardPage {
     return {
       start: end.minus(duration),
       end,
-      step: step as Step,
+      step: period === "PT2H" ? "5min" : (step as Step),
     };
   }
 }
