@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b37a9b9a-67dd-452c-a746-88034190737a</UserSecretsId>
     <PublishAot>true</PublishAot>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Dapper.AOT</InterceptorsNamespaces>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="**/*.sql" />

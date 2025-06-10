@@ -1,6 +1,6 @@
-import { DateTime, Duration } from "luxon";
 import { dateTimeConverter, jsonProperty } from "@utiliread/json";
 
+import { DateTime } from "luxon";
 import { StationId } from "./primitives";
 import { http } from "./http";
 
@@ -78,7 +78,7 @@ export class AggregateWeatherData {
   atmosphericPressureMax: number | null = null;
 }
 
-export type Step = "month" | "day" | "hour";
+export type Step = "month" | "day" | "hour" | "5min";
 
 export const getWeather = (stationId: StationId, params?: { limit?: number }) =>
   http.get(`/stations/${stationId}/weather`, params).expectJsonArray(WeatherData).transfer();
