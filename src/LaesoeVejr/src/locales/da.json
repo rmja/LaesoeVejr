@@ -1,0 +1,16 @@
+{
+  "periods": {
+    "past": "Seneste",
+    "PT24H": "24 timer",
+    "P30D": "30 døgn",
+    "P24M": "24 måneder"
+  },
+  "cameras": {
+    "laesoefaergen-oest": "Læsøfærgen Øst",
+    "laesoefaergen-vest": "Læsøfærgen Vest",
+    "havnekontoret-nord": "Havnekontoret Nord",
+    "havnekontoret-syd": "Havnekontoret Syd",
+    "flyvepladsen-telemast": "Flyvepladsen Telemast",
+    "flyvepladsen-vindpose": "Flyvepladsen Vindpose"
+  }
+}

@@ -1,0 +1,53 @@
+<div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3" style="z-index: 1">
+  <button class="btn btn-light dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+    <i class="bi bi-sun-fill"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end shadow">
+    <li>
+      <button
+        class="dropdown-item d-flex align-items-center ${theme === 'light' ? 'active' : ''}"
+        click.trigger="useTheme('light')"
+      >
+        <i class="bi bi-sun-fill me-2 opacity-50"></i>
+        Light
+        <i class="bi bi-check2 ms-auto" show.bind="theme === 'light'"></i>
+      </button>
+    </li>
+    <li>
+      <button
+        class="dropdown-item d-flex align-items-center ${theme === 'dark' ? 'active' : ''}"
+        click.trigger="useTheme('dark')"
+      >
+        <i class="bi bi-moon-stars-fill me-2 opacity-50"></i>
+        Dark
+        <i class="bi bi-check2 ms-auto" show.bind="theme === 'dark'"></i>
+      </button>
+    </li>
+    <li>
+      <button
+        class="dropdown-item d-flex align-items-center ${theme === 'auto' ? 'active' : ''}"
+        click.trigger="useTheme('auto')"
+      >
+        <i class="bi bi-circle-half me-2 opacity-50"></i>
+        Auto
+        <i class="bi bi-check2 ms-auto" show.bind="theme === 'auto'"></i>
+      </button>
+    </li>
+  </ul>
+</div>
+
+<!-- <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Vejret på Læsø</a>
+  </div>
+</nav> -->
+
+<main class="container">
+  <au-viewport></au-viewport>
+</main>
+
+<div class="container">
+  <footer class="py-3 my-4">
+    <p class="text-center text-muted">Lavet med <i class="bi bi-heart"></i> på Læsø</p>
+  </footer>
+</div>

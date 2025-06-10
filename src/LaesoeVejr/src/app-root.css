@@ -1,0 +1,23 @@
+:root {
+  --ins-primary: #1ab394;
+  --ins-secondary: #1c84c6;
+  --ins-success: #0acf97;
+  --ins-info: #23c6c8;
+  --ins-warning: #f8ac59;
+  --ins-danger: #ed5565;
+  --ins-purple: #7b70ef;
+  --ins-light: #eef2f7;
+  --ins-dark: #313a46;
+}
+
+.text-primary {
+  color: var(--ins-primary) !important;
+}
+
+.text-danger {
+  color: var(--ins-danger) !important;
+}
+
+.text-secondary {
+  color: var(--ins-secondary) !important;
+}

@@ -1,0 +1,121 @@
+<h1 class="display-4">Vejret på Vesterø Havn</h1>
+
+<div class="row">
+  <div class="col-md mt-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title d-flex gap-2">
+          <i class="bi bi-wind text-primary"></i>
+          <span>Vind</span>
+        </h5>
+      </div>
+      <div class="card-body">
+        <h3>
+          <div class="float-end">
+            <svg
+              class="bi"
+              width="32"
+              height="32"
+              fill="currentColor"
+              css="transform: rotate(${current.windDirection}deg)"
+            >
+              <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#arrow-up-circle" />
+            </svg>
+          </div>
+          ${current.windSpeed | round:1} <span class="text-muted">m/s</span>
+        </h3>
+        <span
+          >Vindstød
+          <span class="fw-semibold">${current.windGust | round:1}</span>
+          m/s</span
+        >
+        <i class="bi bi-dot"></i>
+        <span>Vindretning <span class="fw-semibold">${current.windDirection | round}</span>&deg;</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md mt-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title d-flex gap-2">
+          <i class="bi bi-cloud text-info"></i>
+          <span>Luft</span>
+        </h5>
+      </div>
+      <div class="card-body">
+        <h3>${current.airTemperature | round:2}<span class="text-muted">&deg;C</span></h3>
+        <span class="d-inline-block"
+          >Tryk
+          <span class="fw-semibold">${current.atmosphericPressure | round}</span>
+          hPa</span
+        >
+        <i class="bi bi-dot"></i>
+        <span class="d-inline-block">
+          Luftfugtighed
+          <span class="fw-semibold">${current.humidity | round}</span>%</span
+        >
+      </div>
+    </div>
+  </div>
+  <div class="col-md mt-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title d-flex gap-2">
+          <i class="bi bi-water text-secondary"></i>
+          <span>Vand</span>
+        </h5>
+      </div>
+      <div class="card-body">
+        <h3>${current.waterTemperature | round:2}<span class="text-muted">&deg;C</span></h3>
+        <span
+          >Vandstand <span class="fw-semibold">${current.seaLevel | round:2}</span> m
+          <span class="fw-semibold" if.bind="current.seaLevel >= 0">over</span>
+          <span class="fw-semibold" else>under</span> normal</span
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .canvas-container {
+    height: 200px;
+  }
+</style>
+
+<div class="canvas-container">
+  <canvas ref="windCanvas" class="mt-4"></canvas>
+</div>
+
+<div class="canvas-container">
+  <canvas ref="temperatureCanvas" class="mt-4"></canvas>
+</div>
+
+<div class="canvas-container">
+  <canvas ref="waterLevelCanvas" class="mt-4"></canvas>
+</div>
+
+<div class="justify-content-center text-center mt-4">
+  <div class="btn-group">
+    <button
+      class="btn ${period === selectedPeriod ? 'btn-primary active' : 'btn-secondary'}"
+      repeat.for="period of periods"
+      click.trigger="setChartPeriod(period)"
+    >
+      <i class="bi bi-arrow-clockwise"></i> <span t="periods.${period}"></span>
+    </button>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-6 mt-4" repeat.for="camera of cameras">
+    <div class="card">
+      <img class="card-img-top" src.bind="getCameraImageUrl(camera)" t="[alt]cameras.${camera}" />
+      <div class="card-body">
+        <a href="/cameras/${camera}" class="btn btn-default stretched-link">
+          <h5 class="card-title" t="cameras.${camera}"></h5>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

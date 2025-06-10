@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: laesoe-vejr
+  namespace: laesoe-vejr
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - vejr.laesoe.org
+      secretName: laesoe-vejr-ingress-tls
+  rules:
+    - host: vejr.laesoe.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: laesoe-vejr
+                port:
+                  number: 80

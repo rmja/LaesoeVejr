@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laesoe-vejr
+  namespace: laesoe-vejr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laesoe-vejr
+  template:
+    metadata:
+      labels:
+        app: laesoe-vejr
+    spec:
+      containers:
+      - name: laesoe-vejr
+        image: rmjac/laesoe-vejr:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name:  laesoe-vejr
+          - secretRef:
+              name:  laesoe-vejr

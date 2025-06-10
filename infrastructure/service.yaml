@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: laesoe-vejr
+  namespace: laesoe-vejr
+  labels:
+    svc: laesoe-vejr
+spec:
+  selector:
+    app: laesoe-vejr
+  ports:
+  - port: 80
+    targetPort: 8080
