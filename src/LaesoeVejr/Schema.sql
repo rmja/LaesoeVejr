@@ -9,7 +9,7 @@
   sea_level double,
   pressure double,
   humidity double
-) TIMESTAMP(time) PARTITION BY YEAR;
+) TIMESTAMP(time) PARTITION BY MONTH;
 
 -- DROP MATERIALIZED VIEW laesoe_weather_5min;
 CREATE MATERIALIZED VIEW IF NOT EXISTS laesoe_weather_5min AS (
