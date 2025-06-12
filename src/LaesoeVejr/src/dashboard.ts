@@ -66,7 +66,7 @@ export class DashboardPage {
   constructor(private api = resolve(IApiClient)) {}
 
   getCameraImageUrl(cameraId: CameraId): string {
-    return this.api.cameras.getImageUrl(cameraId);
+    return this.api.cameras.getThumbnailUrl(cameraId);
   }
 
   async loading() {

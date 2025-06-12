@@ -13,7 +13,7 @@ Settings.throwOnInvalid = true;
 const aurelia = new Aurelia()
   .register(
     RouterConfiguration.customize({
-      title: "${componentTitles}${appTitleSeparator}Vejret på Læsø",
+      title: "Vejret på Læsø",
       useUrlFragmentHash: false,
     }),
   )

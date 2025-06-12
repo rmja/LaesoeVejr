@@ -4,7 +4,6 @@ using LaesoeVejr.Cameras;
 using LaesoeVejr.Dapper;
 using LaesoeVejr.Weather;
 using Microsoft.Extensions.FileProviders;
-using Npgsql;
 using QuestDB;
 
 [assembly: DapperAot]
@@ -40,9 +39,6 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder
     .Services.AddHostedService<CameraImageDownloader>()
     .Configure<SftpOptions>(builder.Configuration.GetSection("Sftp"));
-
-// Can be removed
-builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

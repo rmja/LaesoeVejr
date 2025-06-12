@@ -12,7 +12,6 @@ import template from "./app-root.html";
 @routes([
   {
     id: "dashboard",
-    // title: "asd",
     path: "",
     component: import("./dashboard"),
   },

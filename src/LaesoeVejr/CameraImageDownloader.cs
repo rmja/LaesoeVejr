@@ -1,18 +1,22 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Renci.SshNet;
+using Renci.SshNet.Sftp;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace LaesoeVejr;
 
 public class CameraImageDownloader(
-    IHttpClientFactory httpClientFactory,
+    ILogger<CameraImageDownloader> logger,
     IOptions<SftpOptions> options,
     TimeProvider timeProvider
 ) : BackgroundService
 {
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
+        await DownloadImagesAsync(cancellationToken);
         await base.StartAsync(cancellationToken);
-        await DownloadCameraImagesAsync(cancellationToken);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -21,133 +25,148 @@ public class CameraImageDownloader(
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
-            await DownloadCameraImagesAsync(stoppingToken);
+            await DownloadImagesAsync(stoppingToken);
         }
     }
 
-    private async Task DownloadCameraImagesAsync(CancellationToken cancellationToken)
+    private async Task DownloadImagesAsync(CancellationToken cancellationToken)
     {
-        using var httpClient = httpClientFactory.CreateClient();
-        await Task.WhenAll(
-            GetLegacyCameraImageAsync(
-                httpClient,
-                "Vejrstation.jpg",
-                "laesoefaergen-oest.jpg",
-                cancellationToken
-            ),
-            GetLegacyCameraImageAsync(
-                httpClient,
-                "VejrstationVest.jpg",
-                "laesoefaergen-vest.jpg",
-                cancellationToken
-            ),
-            GetLegacyCameraImageAsync(
-                httpClient,
-                "HavnekontorSyd.jpg",
-                "havnekontoret-syd.jpg",
-                cancellationToken
-            ),
-            GetLegacyCameraImageAsync(
-                httpClient,
-                "HavnekontorNord.jpg",
-                "havnekontoret-nord.jpg",
-                cancellationToken
-            ),
-            GetLegacyCameraImageAsync(
-                httpClient,
-                "telemast.jpg",
-                "flyvepladsen-telemast.jpg",
-                cancellationToken
-            ),
-            GetLegacyCameraImageAsync(
-                httpClient,
-                "vindpose.jpg",
-                "flyvepladsen-vindpose.jpg",
-                cancellationToken
-            )
+        using var client = new SftpClient(
+            options.Value.Host,
+            options.Value.Port,
+            options.Value.Username,
+            options.Value.Password
         );
-        //using var client = new SftpClient(
-        //    options.Value.Host,
-        //    options.Value.Port,
-        //    options.Value.Username,
-        //    options.Value.Password
-        //);
 
-        //await client.ConnectAsync(cancellationToken);
+        await client.ConnectAsync(cancellationToken);
 
-        //await foreach (
-        //    var file in client.ListDirectoryAsync("/home/laesoe-vejr", cancellationToken)
-        //)
-        //{
-        //    if (file.Name == "Vejrstation.jpg")
-        //    {
-        //        await DownloadImageAsync(
-        //            client,
-        //            file.FullName,
-        //            "laesoefaergen-vest.jpg",
-        //            cancellationToken
-        //        );
-        //    }
-        //}
+        await TryDownloadImageAsync(
+            client,
+            "laesoefaergen-oest",
+            "Camera/Vejrstation",
+            cancellationToken
+        );
+        await TryDownloadImageAsync(
+            client,
+            "laesoefaergen-vest",
+            "Camera/VejrstationVest",
+            cancellationToken
+        );
+        await TryDownloadImageAsync(
+            client,
+            "havnekontoret-syd",
+            "Camera/HavnekontorSyd",
+            cancellationToken
+        );
+        await TryDownloadImageAsync(
+            client,
+            "havnekontoret-nord",
+            "Camera/HavnekontorNord",
+            cancellationToken
+        );
+        await TryDownloadImageAsync(
+            client,
+            "flyvepladsen-telemast",
+            "Camera/Telemast",
+            cancellationToken
+        );
+
+        await TryDownloadImageAsync(
+            client,
+            "flyvepladsen-vindpose",
+            "Camera/Vindpose",
+            cancellationToken
+        );
     }
 
-    private static async Task GetLegacyCameraImageAsync(
-        HttpClient client,
-        string legacyFilename,
-        string fileName,
+    private async Task TryDownloadImageAsync(
+        SftpClient client,
+        string cameraId,
+        string remoteDirectory,
         CancellationToken cancellationToken
     )
     {
-        using var request = new HttpRequestMessage(
-            HttpMethod.Get,
-            $"https://93.167.192.205/Camera/{legacyFilename}"
+        try
+        {
+            await DownloadImageAsync(client, cameraId, remoteDirectory, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to download image for camera {CameraId}", cameraId);
+        }
+    }
+
+    private async Task DownloadImageAsync(
+        SftpClient client,
+        string cameraId,
+        string remoteDirectory,
+        CancellationToken cancellationToken
+    )
+    {
+        logger.LogInformation(
+            "Downloading image for camera {CameraId} from {RemoteDirectory}",
+            cameraId,
+            remoteDirectory
         );
-        request.Headers.Host = "www.laesoe-vejr.dk";
-        using var response = await client.SendAsync(request, cancellationToken);
-        if (!response.IsSuccessStatusCode)
+
+        var images = new List<ISftpFile>();
+        await foreach (var file in client.ListDirectoryAsync(remoteDirectory, cancellationToken))
+        {
+            if (file.Name.EndsWith(".jpg"))
+            {
+                images.Add(file);
+            }
+        }
+
+        var newestImage = images.MaxBy(f => f.LastWriteTime);
+        if (newestImage is null)
         {
             return;
         }
 
-        var tmpFileName = Path.GetTempFileName();
-        await using (var tmpFile = File.OpenWrite(tmpFileName))
-        {
-            await response.Content.CopyToAsync(tmpFile, cancellationToken);
-        }
-
-        File.Move(
-            tmpFileName,
-            Path.Combine(Path.GetTempPath(), "LaesoeVejrCameraImages", fileName),
-            overwrite: true
-        );
-    }
-
-    private static async Task DownloadImageAsync(
-        SftpClient client,
-        string remoteFilePath,
-        string fileName,
-        CancellationToken cancellationToken
-    )
-    {
         await using var remoteFile = await client.OpenAsync(
-            remoteFilePath,
+            newestImage.FullName,
             FileMode.Open,
             FileAccess.Read,
             cancellationToken
         );
 
-        var tmpFileName = Path.GetTempFileName();
-        await using (var tmpFile = File.OpenWrite(tmpFileName))
+        var tempImageFileName = Path.GetTempFileName();
+        await using (var tmpFile = File.OpenWrite(tempImageFileName))
         {
             await remoteFile.CopyToAsync(tmpFile, cancellationToken);
         }
 
+        var tempThumbnailFileName = Path.GetTempFileName();
+        using (var image = await Image.LoadAsync(tempImageFileName, cancellationToken))
+        {
+            var thumbnail = image.Clone(image =>
+                image.Resize(
+                    new ResizeOptions() { Mode = ResizeMode.Max, Size = new Size(634, 500) }
+                )
+            );
+            await thumbnail.SaveAsJpegAsync(tempThumbnailFileName, cancellationToken);
+        }
+
         File.Move(
-            tmpFileName,
-            Path.Combine(Path.GetTempPath(), "LaesoeVejrCameraImages", fileName),
+            tempImageFileName,
+            Path.Combine(Path.GetTempPath(), "LaesoeVejrCameraImages", cameraId + ".jpg"),
             overwrite: true
         );
 
-        //await file.DeleteAsync(cancellationToken);
+        File.Move(
+            tempThumbnailFileName,
+            Path.Combine(Path.GetTempPath(), "LaesoeVejrCameraImages", cameraId + "-thumbnail.jpg"),
+            overwrite: true
+        );
+
+        // Delete all but the newest image
+        foreach (var image in images)
+        {
+            if (image != newestImage)
+            {
+                await image.DeleteAsync(cancellationToken);
+            }
+        }
     }
 }
