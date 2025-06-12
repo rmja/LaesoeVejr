@@ -11,10 +11,21 @@ spec:
   tls:
     - hosts:
       - laesoe-vejr.dk
+      - www.laesoe-vejr.dk
       - vejr.laesoe.org
       secretName: laesoe-vejr-ingress-tls
   rules:
     - host: laesoe-vejr.dk
+      http:  
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: laesoe-vejr
+                port:
+                  number: 80
+    - host: www.laesoe-vejr.dk
       http:
         paths:
           - path: /
