@@ -6,8 +6,8 @@ using LaesoeVejr.Weather;
 using Microsoft.Extensions.FileProviders;
 using QuestDB;
 
-[assembly: DapperAot]
-[assembly: TypeHandler<DateTime, UtcDateTimeHandler>]
+[module: DapperAot]
+[module: TypeHandler<DateTime, UtcDateTimeHandler>] // This does not work so we manually specify kind in the exposed models
 
 var builder = WebApplication.CreateSlimBuilder(args);
 

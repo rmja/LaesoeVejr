@@ -1,8 +1,18 @@
-﻿namespace LaesoeVejr.Weather;
+﻿using Dapper;
+using LaesoeVejr.Dapper;
 
+namespace LaesoeVejr.Weather;
+
+[TypeHandler<DateTime, UtcDateTimeHandler>]
 public record AggregateWeatherData
 {
-    public DateTime Time { get; init; }
+    private DateTime _time;
+
+    public DateTime Time
+    {
+        get => _time;
+        init => _time = value.AsUtc();
+    }
     public required string StationId { get; init; }
     public double? WindSpeedAvg { get; init; }
     public double? WindSpeedMin { get; init; }

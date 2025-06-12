@@ -1,8 +1,16 @@
-﻿namespace LaesoeVejr.Weather;
+﻿using Dapper;
+
+namespace LaesoeVejr.Weather;
 
 public record WeatherData
 {
-    public DateTime Time { get; init; }
+    private DateTime _time;
+
+    public DateTime Time
+    {
+        get => _time;
+        init => _time = value.AsUtc();
+    }
     public required string StationId { get; init; }
     public double? WindSpeed { get; init; }
     public double? WindGust { get; init; }

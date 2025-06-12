@@ -1,10 +1,10 @@
 {
   "periods": {
     "past": "Seneste",
-    "PT2H": "2 timer",
-    "PT24H": "24 timer",
-    "P30D": "30 døgn",
-    "P24M": "24 måneder"
+    "PT4H": "4 timer",
+    "PT48H": "48 timer",
+    "P60D": "60 døgn",
+    "P48M": "48 måneder"
   },
   "cameras": {
     "laesoefaergen-oest": "Læsøfærgen Øst",

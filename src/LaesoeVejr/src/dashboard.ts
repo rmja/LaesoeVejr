@@ -39,14 +39,14 @@ interface DateTimePoint {
 }
 
 const STATION_ID: StationId = "vesteroe-havn";
-type Period = "past" | "PT2H" | "PT24H" | "P30D" | "P24M";
+type Period = "past" | "PT4H" | "PT48H" | "P60D" | "P48M";
 
 @customElement({ name: "dashboard-page", template })
 export class DashboardPage {
   current!: WeatherDataViewModel;
   private history!: AggregateWeatherData[];
-  periods: Period[] = ["past", "PT2H", "PT24H", "P30D", "P24M"];
-  selectedPeriod: Period = "PT2H";
+  periods: Period[] = ["past", "PT4H", "PT48H", "P60D", "P48M"];
+  selectedPeriod: Period = "PT4H";
   cameras: CameraId[] = [
     "laesoefaergen-oest",
     "laesoefaergen-vest",
@@ -248,7 +248,7 @@ export class DashboardPage {
     return {
       start: end.minus(duration),
       end,
-      step: period === "PT2H" ? "5min" : (step as Step),
+      step: period === "PT4H" ? "5min" : (step as Step),
     };
   }
 }
