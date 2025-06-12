@@ -28,9 +28,11 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddNpgsqlDataSource(
     builder.Configuration.GetConnectionString("QuestDbPostgresql")!
 );
-builder.Services.AddTransient(services =>
-    Sender.New(builder.Configuration.GetConnectionString("QuestDbSender")!)
+
+var senderOptions = new NativeAotSenderOptions(
+    builder.Configuration.GetConnectionString("QuestDbSender")!
 );
+builder.Services.AddTransient(services => Sender.New(senderOptions));
 
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolver = LaesoeVejrJsonSerializerContext.Default

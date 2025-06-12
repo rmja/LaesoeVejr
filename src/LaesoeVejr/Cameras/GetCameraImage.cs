@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-
-namespace LaesoeVejr.Cameras;
+﻿namespace LaesoeVejr.Cameras;
 
 public static class GetCameraImage
 {

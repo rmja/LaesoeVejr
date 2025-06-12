@@ -70,5 +70,7 @@ public static class VesteroeHavnIngest
         }
 
         await sender.AtAsync(DateTime.UtcNow, cancellationToken);
+
+        await sender.SendAsync(cancellationToken);
     }
 }
