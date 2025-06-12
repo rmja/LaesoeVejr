@@ -7,12 +7,14 @@ import template from "./camera.html";
 @customElement({ name: "camera-page", template })
 export class CameraPage {
   cameraId!: CameraId;
-  cameraImageUrl!: string;
+  previewImageUrl!: string;
+  originalImageUrl!: string;
 
   constructor(private api = resolve(IApiClient)) {}
 
   load(params: { cameraId: CameraId }) {
     this.cameraId = params.cameraId;
-    this.cameraImageUrl = this.api.cameras.getImageUrl(this.cameraId);
+    this.previewImageUrl = this.api.cameras.getPreviewImageUrl(this.cameraId);
+    this.originalImageUrl = this.api.cameras.getOriginalImageUrl(this.cameraId);
   }
 }

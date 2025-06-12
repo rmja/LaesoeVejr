@@ -4,37 +4,29 @@ public static class GetCameraImage
 {
     public static void AddRoutes(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/api/cameras/{cameraId}/image.jpg", GetImageAsync);
-        builder.MapGet("/api/cameras/{cameraId}/thumbnail.jpg", GetThumbnailAsync);
+        builder.MapGet("/api/cameras/{cameraId}/{basename}.{extension}", GetImageAsync);
     }
 
     public static IResult GetImageAsync(
         string cameraId,
+        string basename,
+        string extension,
         IWebHostEnvironment hostEnvironment,
         CancellationToken cancellationToken = default
     )
     {
-        var fileName = $"{cameraId}.jpg";
+        var fileName = $"{basename}.{extension}" switch
+        {
+            "thumbnail.webp" => $"{cameraId}-thumbnail.webp",
+            "preview.webp" => $"{cameraId}-preview.webp",
+            "image.jpg" => $"{cameraId}.jpg",
+            _ => null,
+        };
 
-        if (!hostEnvironment.WebRootFileProvider.GetFileInfo(fileName).Exists)
+        if (fileName is null || !hostEnvironment.WebRootFileProvider.GetFileInfo(fileName).Exists)
         {
             return Results.NotFound();
         }
-        return Results.File(fileName, contentType: "image/jpeg", fileDownloadName: fileName);
-    }
-
-    public static IResult GetThumbnailAsync(
-        string cameraId,
-        IWebHostEnvironment hostEnvironment,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var fileName = $"{cameraId}-thumbnail.jpg";
-
-        if (!hostEnvironment.WebRootFileProvider.GetFileInfo(fileName).Exists)
-        {
-            return Results.NotFound();
-        }
-        return Results.File(fileName, contentType: "image/jpeg", fileDownloadName: fileName);
+        return Results.File(fileName, fileDownloadName: fileName);
     }
 }

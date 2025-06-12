@@ -4,11 +4,12 @@
     "start": "webpack --mode development --watch",
     "build": "webpack --mode production",
     "prettier": "prettier --write *.ejs *.mjs package.json tsconfig*.json src/**/*.{html,ts,css,json} typings/**/*.d.ts",
-    "clean": "rimraf dist"
+    "clean": "rimraf wwwroot"
   },
   "devDependencies": {
     "@types/chart.js": "^2.9.41",
     "@types/luxon": "^3.4.2",
+    "compression-webpack-plugin": "^11.1.0",
     "css-loader": "^7.1.2",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.3",

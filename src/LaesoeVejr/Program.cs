@@ -4,6 +4,7 @@ using LaesoeVejr.Cameras;
 using LaesoeVejr.Dapper;
 using LaesoeVejr.Weather;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
 using QuestDB;
 
 [module: DapperAot]
@@ -34,9 +35,11 @@ var senderOptions = new NativeAotSenderOptions(
 );
 builder.Services.AddTransient(services => Sender.New(senderOptions));
 
-builder.Services.ConfigureHttpJsonOptions(options =>
-    options.SerializerOptions.TypeInfoResolver = LaesoeVejrJsonSerializerContext.Default
-);
+builder
+    .Services.AddResponseCompression(options => options.EnableForHttps = true)
+    .ConfigureHttpJsonOptions(options =>
+        options.SerializerOptions.TypeInfoResolver = LaesoeVejrJsonSerializerContext.Default
+    );
 
 builder
     .Services.AddHostedService<CameraImageDownloader>()
@@ -44,6 +47,7 @@ builder
 
 var app = builder.Build();
 
+app.UseResponseCompression();
 GetCameraImage.AddRoutes(app);
 GetWeather.AddRoutes(app);
 VesteroeHavnIngest.AddRoutes(app, app.Configuration["VesteroeHavnIngestUrl"]!);
@@ -53,6 +57,17 @@ app.MapWhen(
     notApi =>
         notApi
             .UseDefaultFiles()
+            .UseStaticFiles(
+                new StaticFileOptions()
+                {
+                    FileProvider = new AppendExtensionFileProvider(
+                        app.Environment.WebRootFileProvider,
+                        ".gz"
+                    ),
+                    OnPrepareResponse = context =>
+                        context.Context.Response.Headers.ContentEncoding = "gzip",
+                }
+            )
             .UseStaticFiles()
             .UseRouting()
             .UseEndpoints(endpoints => endpoints.MapFallbackToFile("index.html"))
@@ -61,3 +76,15 @@ app.MapWhen(
 app.Run();
 
 public partial class Program;
+
+class AppendExtensionFileProvider(IFileProvider inner, string fileExtension) : IFileProvider
+{
+    public IDirectoryContents GetDirectoryContents(string subpath) =>
+        inner.GetDirectoryContents(subpath);
+
+    public IFileInfo GetFileInfo(string subpath) => inner.GetFileInfo(subpath + fileExtension);
+
+    public IChangeToken Watch(string filter) => throw new NotImplementedException();
+
+    IChangeToken IFileProvider.Watch(string filter) => throw new NotImplementedException();
+}

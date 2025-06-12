@@ -1,3 +1,4 @@
+import CompressionPlugin from "compression-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { resolve } from "path";
 import webpack from "webpack";
@@ -31,6 +32,13 @@ export default (_env, argv) => {
       new HtmlWebpackPlugin({
         template: "index.ejs",
       }),
+      ...(mode === "production"
+        ? [
+            new CompressionPlugin({
+              test: /\.(js|css|html|svg)$/,
+            }),
+          ]
+        : []),
     ],
     experiments: {
       topLevelAwait: true,

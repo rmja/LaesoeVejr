@@ -130,32 +130,50 @@ public class CameraImageDownloader(
             cancellationToken
         );
 
-        var tempImageFileName = Path.GetTempFileName();
-        await using (var tmpFile = File.OpenWrite(tempImageFileName))
+        var tempOriginalJpgFileName = Path.GetTempFileName();
+        await using (var tmpFile = File.OpenWrite(tempOriginalJpgFileName))
         {
             await remoteFile.CopyToAsync(tmpFile, cancellationToken);
         }
 
-        var tempThumbnailFileName = Path.GetTempFileName();
-        using (var image = await Image.LoadAsync(tempImageFileName, cancellationToken))
+        var tempPreviewWebpFileName = Path.GetTempFileName();
+        var tempThumbnailWebpFileName = Path.GetTempFileName();
+        using (var image = await Image.LoadAsync(tempOriginalJpgFileName, cancellationToken))
         {
+            var preview = image.Clone(image =>
+                image.Resize(
+                    new ResizeOptions() { Mode = ResizeMode.Max, Size = new Size(1116, 900) }
+                )
+            );
+            await preview.SaveAsWebpAsync(tempPreviewWebpFileName, cancellationToken);
+
             var thumbnail = image.Clone(image =>
                 image.Resize(
                     new ResizeOptions() { Mode = ResizeMode.Max, Size = new Size(634, 500) }
                 )
             );
-            await thumbnail.SaveAsJpegAsync(tempThumbnailFileName, cancellationToken);
+            await thumbnail.SaveAsWebpAsync(tempThumbnailWebpFileName, cancellationToken);
         }
 
         File.Move(
-            tempImageFileName,
+            tempOriginalJpgFileName,
             Path.Combine(Path.GetTempPath(), "LaesoeVejrCameraImages", cameraId + ".jpg"),
             overwrite: true
         );
 
         File.Move(
-            tempThumbnailFileName,
-            Path.Combine(Path.GetTempPath(), "LaesoeVejrCameraImages", cameraId + "-thumbnail.jpg"),
+            tempPreviewWebpFileName,
+            Path.Combine(Path.GetTempPath(), "LaesoeVejrCameraImages", cameraId + "-preview.webp"),
+            overwrite: true
+        );
+
+        File.Move(
+            tempThumbnailWebpFileName,
+            Path.Combine(
+                Path.GetTempPath(),
+                "LaesoeVejrCameraImages",
+                cameraId + "-thumbnail.webp"
+            ),
             overwrite: true
         );
 

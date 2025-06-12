@@ -4,7 +4,6 @@ import { AggregateWeatherData, Step, WeatherData } from "./api/weather";
 import {
   BarController,
   BarElement,
-  CategoryScale,
   Chart,
   Legend,
   LineController,
@@ -21,17 +20,7 @@ import { IApiClient } from "./api";
 import { StationId } from "./api/primitives";
 import template from "./dashboard.html";
 
-Chart.register(
-  BarController,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  TimeScale,
-  LineController,
-  PointElement,
-  LineElement,
-  Legend,
-);
+Chart.register(BarController, LinearScale, BarElement, TimeScale, LineController, PointElement, LineElement, Legend);
 
 interface DateTimePoint {
   x: DateTime;
@@ -39,13 +28,13 @@ interface DateTimePoint {
 }
 
 const STATION_ID: StationId = "vesteroe-havn";
-type Period = "past" | "PT4H" | "PT48H" | "P60D" | "P48M";
+type Period = "past" | "PT4H" | "PT48H" | "P60D" | "P4Y";
 
 @customElement({ name: "dashboard-page", template })
 export class DashboardPage {
   current!: WeatherDataViewModel;
   private history!: AggregateWeatherData[];
-  periods: Period[] = ["past", "PT4H", "PT48H", "P60D", "P48M"];
+  periods: Period[] = ["past", "PT4H", "PT48H", "P60D", "P4Y"];
   selectedPeriod: Period = "PT4H";
   cameras: CameraId[] = [
     "laesoefaergen-oest",
@@ -241,14 +230,15 @@ export class DashboardPage {
   private getHistoryPeriod() {
     const period = this.selectedPeriod;
     const duration = Duration.fromISO(period);
-    const step = duration.hours ? "hour" : duration.days ? "day" : "month";
+    const round = duration.hours ? "hour" : duration.days ? "day" : "month";
     const end = DateTime.local()
-      .startOf(step)
-      .plus({ [step]: 1 });
+      .startOf(round)
+      .plus({ [round]: 1 });
+    const step: Step = period === "PT4H" ? "5min" : round;
     return {
       start: end.minus(duration),
       end,
-      step: period === "PT4H" ? "5min" : (step as Step),
+      step,
     };
   }
 }
