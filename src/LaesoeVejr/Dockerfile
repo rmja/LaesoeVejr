@@ -7,20 +7,22 @@ WORKDIR /app
 EXPOSE 8080
 
 # This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
-ARG BUILD_CONFIGURATION=Release
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS buildenv
+RUN apk add --no-cache clang zlib-dev
 WORKDIR /src
 COPY ["src/LaesoeVejr/LaesoeVejr.csproj", "src/LaesoeVejr/"]
 RUN dotnet restore "./src/LaesoeVejr/LaesoeVejr.csproj"
 COPY . .
 WORKDIR "/src/src/LaesoeVejr"
-RUN dotnet build "./LaesoeVejr.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM buildenv AS build
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet build "./LaesoeVejr.csproj" -c $BUILD_CONFIGURATION --no-restore -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
+FROM buildenv AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN apk add --no-cache clang zlib-dev
-RUN dotnet publish "./LaesoeVejr.csproj" -c $BUILD_CONFIGURATION -o /app/publish
+RUN dotnet publish "./LaesoeVejr.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:DebugType=None /p:DebugSymbols=false
 
 # This stage is used to build the frontend
 FROM node:24-alpine AS webpack
