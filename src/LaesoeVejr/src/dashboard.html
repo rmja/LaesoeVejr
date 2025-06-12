@@ -45,15 +45,15 @@
       <div class="card-body">
         <h3>${current.airTemperature | round:2}<span class="text-muted">&deg;C</span></h3>
         <span class="d-inline-block"
-          >Tryk
+          >Atmosfærisk tryk
           <span class="fw-semibold">${current.atmosphericPressure | round}</span>
           hPa</span
         >
-        <i class="bi bi-dot"></i>
+        <!-- <i class="bi bi-dot"></i>
         <span class="d-inline-block">
           Luftfugtighed
           <span class="fw-semibold">${current.humidity | round}</span>%</span
-        >
+        > -->
       </div>
     </div>
   </div>
@@ -102,7 +102,7 @@
       repeat.for="period of periods"
       click.trigger="setChartPeriod(period)"
     >
-      <i class="bi bi-arrow-clockwise"></i> <span t="periods.${period}"></span>
+      <span t="periods.${period}"></span>
     </button>
   </div>
 </div>
