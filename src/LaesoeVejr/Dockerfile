@@ -1,3 +1,5 @@
+#syntax=docker/dockerfile:1.7-labs
+
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
@@ -12,7 +14,7 @@ RUN apk add --no-cache clang zlib-dev
 WORKDIR /src
 COPY ["src/LaesoeVejr/LaesoeVejr.csproj", "src/LaesoeVejr/"]
 RUN dotnet restore "./src/LaesoeVejr/LaesoeVejr.csproj"
-COPY . .
+COPY --exclude=*.html --exclude=*.ts . .
 WORKDIR "/src/src/LaesoeVejr"
 
 FROM buildenv AS build
