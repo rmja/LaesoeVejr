@@ -12,14 +12,10 @@ public class CameraImageDownloader(
     TimeProvider timeProvider
 ) : BackgroundService
 {
-    public override async Task StartAsync(CancellationToken cancellationToken)
-    {
-        await DownloadImagesAsync(cancellationToken);
-        await base.StartAsync(cancellationToken);
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await DownloadImagesAsync(stoppingToken);
+
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5), timeProvider);
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
