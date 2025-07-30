@@ -12,7 +12,7 @@ export class CameraPage {
 
   constructor(private api = resolve(IApiClient)) {}
 
-  load(params: { cameraId: CameraId }) {
+  loading(params: { cameraId: CameraId }) {
     this.cameraId = params.cameraId;
     this.previewImageUrl = this.api.cameras.getPreviewImageUrl(this.cameraId);
     this.originalImageUrl = this.api.cameras.getOriginalImageUrl(this.cameraId);

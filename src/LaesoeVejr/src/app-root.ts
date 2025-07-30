@@ -6,21 +6,22 @@ import "./app-root.css";
 import { ICustomElementViewModel, customElement, resolve } from "aurelia";
 
 import { ThemeService } from "./theme-service";
-import { routes } from "@aurelia/router";
+import { route } from "@aurelia/router";
 import template from "./app-root.html";
 
-@routes([
-  {
-    id: "dashboard",
-    path: "",
-    component: import("./dashboard"),
-  },
-  {
-    id: "camera",
-    path: "cameras/:cameraId",
-    component: import("./camera"),
-  },
-])
+@route({
+  title: "Vejret på Læsø",
+  routes: [
+    {
+      path: "",
+      component: import("./dashboard"),
+    },
+    {
+      path: "cameras/:cameraId",
+      component: import("./camera"),
+    },
+  ],
+})
 @customElement({
   name: "app-root",
   template,

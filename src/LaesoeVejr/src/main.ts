@@ -16,7 +16,6 @@ console.log("Time is now", DateTime.local().toLocaleString(DateTime.DATETIME_FUL
 const aurelia = new Aurelia()
   .register(
     RouterConfiguration.customize({
-      title: "Vejret på Læsø",
       useUrlFragmentHash: false,
     }),
   )

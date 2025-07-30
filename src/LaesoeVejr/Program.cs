@@ -6,6 +6,7 @@ using LaesoeVejr.Dapper;
 using LaesoeVejr.Weather;
 using Microsoft.Extensions.FileProviders;
 using QuestDB;
+using QuestDB.Utils;
 
 [module: DapperAot]
 [module: TypeHandler<DateTime, UtcDateTimeHandler>] // This does not work so we manually specify kind in the exposed models
@@ -30,9 +31,7 @@ builder.Services.AddNpgsqlDataSource(
     builder.Configuration.GetConnectionString("QuestDbPostgresql")!
 );
 
-var senderOptions = new NativeAotSenderOptions(
-    builder.Configuration.GetConnectionString("QuestDbSender")!
-);
+var senderOptions = new SenderOptions(builder.Configuration.GetConnectionString("QuestDbSender")!);
 builder.Services.AddTransient(services => Sender.New(senderOptions));
 
 builder
