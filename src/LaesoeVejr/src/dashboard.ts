@@ -14,6 +14,7 @@ import {
 } from "chart.js";
 import { DateTime, Duration } from "luxon";
 import { customElement, resolve } from "aurelia";
+import { deserialize, deserializeString } from "@utiliread/json";
 
 import { CameraId } from "./cameras";
 import { IApiClient } from "./api";
@@ -32,8 +33,11 @@ type Period = "past" | "PT4H" | "PT48H" | "P60D" | "P4Y";
 
 @customElement({ name: "dashboard-page", template })
 export class DashboardPage {
+  dateTimeFormat = DateTime.DATETIME_MED_WITH_SECONDS;
+
   current!: WeatherDataViewModel;
   private history!: AggregateWeatherData[];
+  eventSource!: EventSource;
   periods: Period[] = ["past", "PT4H", "PT48H", "P60D", "P4Y"];
   selectedPeriod: Period = "PT4H";
   cameras: CameraId[] = [
@@ -67,6 +71,16 @@ export class DashboardPage {
       end,
       step,
     });
+
+    this.eventSource = this.api.weather.getWeatherEventSource("vesteroe-havn");
+    this.eventSource.addEventListener("message", (event) => {
+      const data = deserializeString(event.data, WeatherData)!;
+      this.current = data;
+    });
+  }
+
+  async unloading() {
+    this.eventSource.close();
   }
 
   attached() {
@@ -244,6 +258,7 @@ export class DashboardPage {
 }
 
 interface WeatherDataViewModel {
+  time: DateTime;
   windSpeed: number | null;
   windGust: number | null;
   windDirection: number | null;

@@ -3,13 +3,13 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-preview-alpine AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 
 # This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS buildenv
+FROM mcr.microsoft.com/dotnet/sdk:10.0-preview-alpine AS buildenv
 RUN apk add --no-cache clang zlib-dev
 WORKDIR /src
 COPY ["src/LaesoeVejr/LaesoeVejr.csproj", "src/LaesoeVejr/"]

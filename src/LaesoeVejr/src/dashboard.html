@@ -44,11 +44,12 @@
       </div>
       <div class="card-body">
         <h3>${current.airTemperature | round:2}<span class="text-muted">&deg;C</span></h3>
-        <span class="d-inline-block"
+        <span class="d-inline-block">&nbsp;</span>
+        <!-- <span class="d-inline-block"
           >Atmosfærisk tryk
           <span class="fw-semibold">${current.atmosphericPressure | round}</span>
           hPa</span
-        >
+        > -->
         <!-- <i class="bi bi-dot"></i>
         <span class="d-inline-block">
           Luftfugtighed
@@ -76,6 +77,8 @@
     </div>
   </div>
 </div>
+
+<p class="text-muted float-end">Opdateret ${current.time.toLocal().toLocaleString(dateTimeFormat)}</p>
 
 <style>
   .canvas-container {

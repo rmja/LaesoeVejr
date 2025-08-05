@@ -83,5 +83,8 @@ export type Step = "month" | "day" | "hour" | "5min";
 export const getWeather = (stationId: StationId, params?: { limit?: number }) =>
   http.get(`/stations/${stationId}/weather`, params).expectJsonArray(WeatherData).transfer();
 
+export const getWeatherEventSource = (stationId: StationId) =>
+  new EventSource(http.get(`/stations/${stationId}/weather/events`).getUrl());
+
 export const getWeatherHistory = (stationId: StationId, params?: { start: DateTime; end: DateTime; step: Step }) =>
   http.get(`/stations/${stationId}/weather/history`, params).expectJsonArray(AggregateWeatherData).transfer();

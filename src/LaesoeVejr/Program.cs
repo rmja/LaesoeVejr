@@ -4,6 +4,7 @@ using LaesoeVejr;
 using LaesoeVejr.Cameras;
 using LaesoeVejr.Dapper;
 using LaesoeVejr.Weather;
+using MessagePipe;
 using Microsoft.Extensions.FileProviders;
 using QuestDB;
 using QuestDB.Utils;
@@ -40,6 +41,11 @@ builder
     .ConfigureHttpJsonOptions(options =>
         options.SerializerOptions.TypeInfoResolver = LaesoeVejrJsonSerializerContext.Default
     );
+
+builder
+    .Services.AddMessagePipe()
+    .Services.AddSingleton<AsyncMessageBroker<WeatherData>>()
+    .AddSingleton<AsyncMessageBrokerCore<WeatherData>>();
 
 builder
     .Services.AddHostedService<CameraImageDownloader>()

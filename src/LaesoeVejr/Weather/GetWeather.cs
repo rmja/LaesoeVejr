@@ -1,5 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Net.ServerSentEvents;
+using System.Runtime.CompilerServices;
 using Dapper;
+using MessagePipe;
 using Npgsql;
 
 namespace LaesoeVejr.Weather;
@@ -10,6 +13,7 @@ public static class GetWeather
     {
         var weather = builder.MapGroup("/api/stations/{stationId}/weather");
         weather.MapGet("/", GetWeatherAsync);
+        weather.MapGet("/events", GetWeatherEventsAsync);
         weather.MapGet("/history", GetWeatherHistoryAsync);
     }
 
@@ -23,6 +27,30 @@ public static class GetWeather
         var sql = typeof(GetWeather).GetResourceString("GetWeather.sql");
         var weather = await db.QueryAsync<WeatherData>(sql, new { stationId, limit });
         return TypedResults.Ok(weather.AsList());
+    }
+
+    private static IResult GetWeatherEventsAsync(
+        string stationId,
+        HttpContext httpContext,
+        IAsyncSubscriber<WeatherData> subscriber,
+        CancellationToken cancellationToken = default
+    )
+    {
+        async IAsyncEnumerable<SseItem<WeatherData>> StreamWeatherEvents(
+            [EnumeratorCancellation] CancellationToken cancellationToken
+        )
+        {
+            await foreach (
+                var weather in subscriber.AsAsyncEnumerable().WithCancellation(cancellationToken)
+            )
+            {
+                yield return new SseItem<WeatherData>(weather);
+            }
+        }
+
+        httpContext.Response.Headers["X-Accel-Buffering"] = "no";
+
+        return TypedResults.ServerSentEvents(StreamWeatherEvents(cancellationToken));
     }
 
     public record Request(DateTimeOffset Start, DateTimeOffset End, string Step);

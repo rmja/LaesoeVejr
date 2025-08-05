@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b37a9b9a-67dd-452c-a746-88034190737a</UserSecretsId>
@@ -17,6 +17,7 @@
     <PackageReference Include="CompressedStaticFiles" Version="2.2.0" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Dapper.AOT" Version="1.0.48" />
+    <PackageReference Include="MessagePipe" Version="1.8.1" />
     <PackageReference Include="net-questdb-client" Version="3.0.0" />
     <PackageReference Include="Npgsql.DependencyInjection" Version="9.0.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
